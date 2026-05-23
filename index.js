@@ -1,3 +1,5 @@
+// Environment Variable hata kar seedha token daalo (sirf testing ke liye)
+const BOT_TOKEN = '8647547722:AAEvD1kj6gverh31WKTYTc-tZw3GQMf7Pz4';
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
