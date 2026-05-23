@@ -287,8 +287,10 @@ process.on('uncaughtException', (err) => {
     // bot.telegram.sendMessage('YOUR_TELEGRAM_ID', '⚠️ Bot error ki wajah se crash ho raha hai: ' + err.message).catch(console.error);
 });
 
-// Bot Launch
-bot.launch().then(async () => { 
+// Bot Launch with conflict resolution
+bot.launch({ dropPendingUpdates: true }).then(async () => { 
     console.log('🚀 Super Advanced Commercial Alert Bot Live!');
     await setBotCommandsMenu(); 
+}).catch((err) => {
+    console.error('Failed to launch bot:', err);
 });
