@@ -49,7 +49,7 @@ async function getLivePrice(asset) {
         let tvTicker = "";
 
         if (symbol === 'BTCUSDT' || symbol === 'BTC') {
-            const res = await axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { timeout: 3000 });
+            const res = await axios.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', { timeout: 10000 });
             return parseFloat(res.data.price);
         }
         
@@ -61,7 +61,7 @@ async function getLivePrice(asset) {
             const response = await axios.post('https://scanner.tradingview.com/global/scan', {
                 symbols: { tickers: [tvTicker], query: { types: [] } },
                 columns: ["close"]
-            }, { timeout: 3000 });
+            }, { timeout: 10000 });
 
             if (response.data && response.data.data && response.data.data[0]) {
                 return parseFloat(response.data.data[0].d[0]);
@@ -240,4 +240,51 @@ bot.action(/^cancel_(.+)_(.+)$/, async (ctx) => {
         const removed = alertsList.splice(globalIndexToRemove, 1)[0];
         ctx.editMessageText(`🗑️ *Alert Cancelled Successfully!* \n\n🪙 Asset: *${removed.asset}* ki *${removed.target}* waali entry hata di gayi hai.`, { parse_mode: 'Markdown' });
     } else {
-        ctx.reply
+        ctx.reply('❌ Alert nahi mila ya pehle se trigger ho chuka hai.');
+    }
+});
+
+// 8. Background Ultra-Fast Trigger Loop
+setInterval(async () => {
+    if (alertsList.length === 0) return;
+    let remainingAlerts = [];
+    let priceCache = {};
+
+    for (let alert of alertsList) {
+        try {
+            if (!priceCache[alert.asset]) {
+                priceCache[alert.asset] = await getLivePrice(alert.asset);
+            }
+
+            const currentPrice = priceCache[alert.asset];
+            if (currentPrice === 0) { remainingAlerts.push(alert); continue; }
+
+            let isTriggered = false;
+            if (alert.direction === 'UP' && currentPrice >= alert.target) isTriggered = true;
+            if (alert.direction === 'DOWN' && currentPrice <= alert.target) isTriggered = true;
+
+            if (isTriggered) {
+                const alertText = `🔔 📣 *TARGET HIT HO GAYA!* 📣 🔔\n\n⚠️ Attention: ${alert.user}\n\n🚀 Aapka lagaya hua target hit ho chuka hai!\n🪙 *Asset:* ${alert.asset}\n🎯 *Target Level:* ${alert.target}\n📈 *Live Price Right Now:* ${currentPrice}\n\n⚡ _Apne trades check kijiye!_`;
+                await bot.telegram.sendMessage(alert.chatId, alertText, { parse_mode: 'Markdown' });
+            } else {
+                remainingAlerts.push(alert);
+            }
+        } catch (e) { remainingAlerts.push(alert); }
+    }
+    alertsList = remainingAlerts;
+}, 3000);
+
+bot.catch(() => {});
+
+// Global Error Handler
+process.on('uncaughtException', (err) => {
+    console.error('Fatal Error:', err);
+});
+
+// Yahan maine sirf line change ki hai taaki Conflict na ho
+bot.launch({ dropPendingUpdates: true }).then(async () => { 
+    console.log('🚀 Super Advanced Commercial Alert Bot Live!');
+    await setBotCommandsMenu(); 
+}).catch((err) => {
+    console.error('Failed to launch bot:', err);
+});
