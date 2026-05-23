@@ -281,10 +281,13 @@ process.on('uncaughtException', (err) => {
     console.error('Fatal Error:', err);
 });
 
-// Yahan maine sirf line change ki hai taaki Conflict na ho
-bot.launch({ dropPendingUpdates: true }).then(async () => { 
-    console.log('🚀 Super Advanced Commercial Alert Bot Live!');
-    await setBotCommandsMenu(); 
-}).catch((err) => {
-    console.error('Failed to launch bot:', err);
-});
+// Bot Launch - Ye code best hai 409 Conflict hataane ke liye
+bot.launch({ dropPendingUpdates: true })
+  .then(() => {
+    console.log('🚀 Bot is Live and Conflict Free!');
+    setBotCommandsMenu();
+  })
+  .catch((err) => {
+    console.error('Launch Error:', err);
+    process.exit(1); // Agar error aaye toh restart ke liye force karega
+  });
