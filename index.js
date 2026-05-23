@@ -280,3 +280,15 @@ bot.launch().then(async () => {
     console.log('🚀 Super Advanced Commercial Alert Bot Live!');
     await setBotCommandsMenu(); 
 });
+// Global Error Handler
+process.on('uncaughtException', (err) => {
+    console.error('Fatal Error:', err);
+    // Optional: Owner ko alert message bhejne ke liye
+    // bot.telegram.sendMessage('YOUR_TELEGRAM_ID', '⚠️ Bot error ki wajah se crash ho raha hai: ' + err.message).catch(console.error);
+});
+
+// Bot Launch
+bot.launch().then(async () => { 
+    console.log('🚀 Super Advanced Commercial Alert Bot Live!');
+    await setBotCommandsMenu(); 
+});
