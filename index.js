@@ -12,7 +12,7 @@ app.listen(port, () => {
 const { Telegraf, Markup } = require('telegraf');
 const axios = require('axios');
 
-const BOT_TOKEN = '8647547722:AAF2Cl97uDXWARQzeqgR9OVPyBejQ4xJmz0';
+const BOT_TOKEN = process.env.BOT_TOKEN;
 const GROUP_CHAT_ID = '-1003977957230'; 
 const OWNER_USERNAME = '@VDChoudhary2'; // Admin / Owner Username
 
